@@ -1,45 +1,76 @@
 // App.jsx
 import { useState, useEffect } from "react";
+
+import {
+  listarContactos,
+  crearContacto,
+  eliminarContactoPorId,
+} from "./api.js";
+
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
-// Nota: toda la lógica de contactos (agregar/eliminar/persistir) se mantiene.
+
 export default function App() {
- // 1) Cargar lo guardado en localStorage (o array vacío)
- const contactosGuardados = JSON.parse(localStorage.getItem("contactos")) || [];
- // 2) Estado con la lista de contactos
- const [contactos, setContactos] = useState(contactosGuardados);
- // 3) Persistir cambios en localStorage
- useEffect(() => {
- localStorage.setItem("contactos", JSON.stringify(contactos));
- }, [contactos]);
- // 4) Agregar contacto (siempre inmutable)
- const agregarContacto = (nuevo) => setContactos(prev => [...prev, nuevo]);
- // 5) Eliminar usando correo como clave única
- const eliminarContacto = (correo) =>
- setContactos(prev => prev.filter(c => c.correo !== correo));
- 
- return (
- <main className="min-h-screen py-10 px-4">
- {/* Título centrado con color morado */}
- <h1 className="text-4xl font-bold text-center text-purple-600 mb-8">
- Agenda ADSO v3
- </h1>
- <div className="max-w-4xl mx-auto">
- {/* Tarjeta del formulario */}
- <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
- <FormularioContacto onAgregar={agregarContacto} />
- </section>
- {/* Lista de contactos */}
- <section className="space-y-4">
- {contactos.map((c) => (
- <ContactoCard
- key={c.correo}
- {...c}
- onEliminar={eliminarContacto}
- />
- ))}
- </section>
- </div>
- </main>
- );
+  // Estado de los contactos
+  const [contactos, setContactos] = useState([]);
+
+  // GET - Cargar contactos desde JSON Server
+  useEffect(() => {
+    listarContactos()
+      .then((data) => {
+        setContactos(data);
+      })
+      .catch((error) => {
+        console.error("Error al cargar los contactos:", error);
+      });
+  }, []);
+
+  // POST - Agregar contacto
+  const agregarContacto = async (nuevo) => {
+    try {
+      const contactoCreado = await crearContacto(nuevo);
+
+      setContactos((prev) => [...prev, contactoCreado]);
+    } catch (error) {
+      console.error("Error al crear el contacto:", error);
+    }
+  };
+
+  // DELETE - Eliminar contacto
+  const eliminarContacto = async (id) => {
+    try {
+      await eliminarContactoPorId(id);
+
+      setContactos((prev) => prev.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar el contacto:", error);
+    }
+  };
+
+  return (
+    <main className="min-h-screen py-10 px-4">
+      {/* Título */}
+      <h1 className="text-4xl font-bold text-center text-purple-600 mb-8">
+        Agenda ADSO v3
+      </h1>
+
+      <div className="max-w-4xl mx-auto">
+        {/* Formulario */}
+        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
+          <FormularioContacto onAgregar={agregarContacto} />
+        </section>
+
+        {/* Lista de contactos */}
+        <section className="space-y-4">
+          {contactos.map((c) => (
+            <ContactoCard
+              key={c.id}
+              {...c}
+              onEliminar={() => eliminarContacto(c.id)}
+            />
+          ))}
+        </section>
+      </div>
+    </main>
+  );
 }
