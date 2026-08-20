@@ -14,6 +14,13 @@
       "etiqueta": "Aseo",
       "empresa": "Emvarias",
       "id": "sKe7OADFOPI"
+    },
+    {
+      "nombre": "Alma Marcela Gozo ",
+      "telefono": "3001235678",
+      "correo": "alamamarcelagozo@gmail.com",
+      "etiqueta": "Trabajadora",
+      "id": "sTyQ8de8DI8"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

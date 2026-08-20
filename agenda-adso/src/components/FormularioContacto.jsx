@@ -1,94 +1,211 @@
-// src/components/FormularioContacto.jsx
 import { useState } from "react";
-export default function FormularioContacto({ onAgregar }) {
- // Estado único del formulario
- const [form, setForm] = useState({
- nombre: "",
- telefono: "",
- correo: "",
- etiqueta: "",
- empresa: "",
- });
- // Actualizar por nombre de campo
- const onChange = (e) => {
- const { name, value } = e.target;
- setForm(f => ({ ...f, [name]: value }));
- };
-// Enviar datos al padre con validación mínima
-const onSubmit = (e) => {
- e.preventDefault();
-if (!form.nombre || !form.telefono || !form.correo) return;
-onAgregar(form);
-setForm({ nombre: "", telefono: "", correo: "", etiqueta: "", empresa: "" });
- };
-return (
- <form onSubmit={onSubmit} className="space-y-4">
- {/* Nombre + Teléfono (grid responsive) */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- <div>
- <label className="block text-sm font-medium text-gray-700">Nombre *</label>
- <input
-name="nombre"
-value={form.nombre}
-onChange={onChange}
-placeholder="Ej: Ana Pérez"
-className="mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:outline-none p-3"
- />
- </div>
- <div>
- <label className="block text-sm font-medium text-gray-700">Teléfono *</label>
- <input
-name="telefono"
-value={form.telefono}
-onChange={onChange}
-placeholder="Ej: 3001234567"
-className="mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:outline-none p-3"
- />
- </div>
- {/* Correo */}
- <div>
- <label className="block text-sm font-medium text-gray-700">
- Correo *
- </label>
- <input
- name="correo"
- value={form.correo}
- onChange={onChange}
- placeholder="Ej: ana@sena.edu.co"
- className="mt-1 w-full rounded-lg border border-gray-300
-focus:ring-2 focus:ring-purple-500 focus:outline-none p-3"
- />
- </div>
- {/* Etiqueta opcional */}
- <div>
- <label className="block text-sm font-medium text-gray-700">
- Etiqueta (opcional)
- </label>
- <input
- name="etiqueta"
- value={form.etiqueta}
- onChange={onChange}
- placeholder="Ej: Trabajo"
- className="mt-1 w-full rounded-lg border border-gray-300
-focus:ring-2 focus:ring-purple-500 focus:outline-none p-3"/>
 
-<div>{/* Empresa */}</div>
- <label className="block text-sm font-medium text-gray-700">
- Empresa
- </label>
- <input
- name="empresa"
- value={form.empresa}
- onChange={onChange}
- placeholder="Ej: SENA"
- className="mt-1 w-full rounded-lg border border-gray-300
-focus:ring-2 focus:ring-purple-500 focus:outline-none p-3"/>
- </div>
- </div>
- {/* Botón principal morado */}
- <button className="w-full bg-purple-600 hover:bg-purple-700 textwhite font-semibold py-3 rounded-lg transition-colors">
- Agregar contacto
- </button>
- </form>
- );
+function FormularioContacto({ onAgregar }) {
+  // Estado del formulario
+  const [form, setForm] = useState({
+    nombre: "",
+    telefono: "",
+    correo: "",
+    etiqueta: "",
+  });
+
+  // Estado de errores
+  const [errores, setErrores] = useState({
+    nombre: "",
+    telefono: "",
+    correo: "",
+  });
+
+  // Estado de envío
+  const [enviando, setEnviando] = useState(false);
+
+  // Actualizar los campos
+  const onChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
+
+  // Validar formulario
+  function validarFormulario() {
+    const nuevosErrores = {
+      nombre: "",
+      telefono: "",
+      correo: "",
+    };
+
+    // Validar nombre
+    if (!form.nombre.trim()) {
+      nuevosErrores.nombre = "El nombre es obligatorio.";
+    }
+
+    // Validar teléfono
+    if (!form.telefono.trim()) {
+      nuevosErrores.telefono = "El teléfono es obligatorio.";
+    }
+
+    // Validar correo
+    if (!form.correo.trim()) {
+      nuevosErrores.correo = "El correo es obligatorio.";
+    } else if (!form.correo.includes("@")) {
+      nuevosErrores.correo = "El correo debe contener @.";
+    }
+
+    setErrores(nuevosErrores);
+
+    return (
+      nuevosErrores.nombre === "" &&
+      nuevosErrores.telefono === "" &&
+      nuevosErrores.correo === ""
+    );
+  }
+
+  // Enviar formulario
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    const esValido = validarFormulario();
+
+    // Si hay errores, no se envía
+    if (!esValido) {
+      return;
+    }
+
+    try {
+        setEnviando(true);
+
+        // Esperar un momento para poder visualizar "Guardando..."
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        // Enviar contacto a la API
+        await onAgregar(form);
+
+      // Limpiar formulario
+      setForm({
+        nombre: "",
+        telefono: "",
+        correo: "",
+        etiqueta: "",
+      });
+
+      // Limpiar errores
+      setErrores({
+        nombre: "",
+        telefono: "",
+        correo: "",
+      });
+    } catch (error) {
+      console.error("Error en el envío del formulario:", error);
+    } finally {
+      // Volver a habilitar el botón
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <form
+      className="bg-white shadow-sm rounded-2xl p-6 space-y-4 mb-8"
+      onSubmit={onSubmit}
+    >
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">
+        Nuevo contacto
+      </h2>
+
+      {/* Nombre */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Nombre *
+        </label>
+
+        <input
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          name="nombre"
+          placeholder="Ej: Camila Pérez"
+          value={form.nombre}
+          onChange={onChange}
+        />
+
+        {errores.nombre && (
+          <p className="mt-1 text-xs text-red-600">
+            {errores.nombre}
+          </p>
+        )}
+      </div>
+
+      {/* Teléfono */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Teléfono *
+        </label>
+
+        <input
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          name="telefono"
+          placeholder="Ej: 300 123 4567"
+          value={form.telefono}
+          onChange={onChange}
+        />
+
+        {errores.telefono && (
+          <p className="mt-1 text-xs text-red-600">
+            {errores.telefono}
+          </p>
+        )}
+      </div>
+
+      {/* Correo */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Correo *
+        </label>
+
+        <input
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          name="correo"
+          placeholder="Ej: camila@sena.edu.co"
+          value={form.correo}
+          onChange={onChange}
+        />
+
+        {errores.correo && (
+          <p className="mt-1 text-xs text-red-600">
+            {errores.correo}
+          </p>
+        )}
+      </div>
+
+      {/* Etiqueta */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Etiqueta (opcional)
+        </label>
+
+        <input
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          name="etiqueta"
+          placeholder="Ej: Trabajo"
+          value={form.etiqueta}
+          onChange={onChange}
+        />
+      </div>
+
+      {/* Botón */}
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={enviando}
+          className="w-full md:w-auto bg-purple-600 hover:bg-purple-700
+                     disabled:bg-purple-300 disabled:cursor-not-allowed
+                     text-white px-6 py-3 rounded-xl font-semibold shadow-sm"
+        >
+          {enviando ? "Guardando..." : "Agregar contacto"}
+        </button>
+      </div>
+    </form>
+  );
 }
+
+export default FormularioContacto;
