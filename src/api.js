@@ -43,3 +43,13 @@ export async function eliminarContactoPorId(id) {
   // Devolvemos true indicando éxito
   return true;
 }
+
+export async function actualizarContacto(id, data) {
+ const res = await fetch(`${API_BASE_URL}/${id}`, {
+ method: "PUT",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify(data),
+ });
+ if (!res.ok) throw new Error("Error al actualizar el contacto");
+ return res.json(); // Devuelve el contacto actualizado
+}
