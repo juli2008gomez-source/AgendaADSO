@@ -1,4 +1,3 @@
-// Archivo: src/App.jsx
 // Componente principal de la aplicación Agenda ADSO.
 // Se encarga de:
 // - Cargar la lista de contactos desde la API.
@@ -26,11 +25,18 @@ function App() {
   // Estado que almacena la lista de contactos obtenidos de la API
   const [contactos, setContactos] = useState([]);
 
+    // Estado para el término de búsqueda
+  const [busqueda, setBusqueda] = useState("");
+  // Estado para el orden: true = A-Z, false = Z-A
+  const [ordenAsc, setOrdenAsc] = useState(true);
+
   // Estado que indica si estamos cargando información (por ejemplo, al inicio)
   const [cargando, setCargando] = useState(true);
 
   // Estado para guardar mensajes de error generales de la aplicación
   const [error, setError] = useState("");
+
+
 
   // useEffect que se ejecuta una sola vez al montar el componente.
   // Aquí cargamos los contactos iniciales desde JSON Server (GET).
@@ -86,7 +92,7 @@ function App() {
   // Función para eliminar un contacto por su id (DELETE)
   const onEliminarContacto = async (id) => {
     try {
-      setError(""); // Limpiamos errores previos
+      setError(""); // Limpia errores previos
       await eliminarContactoPorId(id); // Llamamos al servicio de eliminación
 
       // Filtramos el contacto eliminado de la lista local
@@ -102,20 +108,48 @@ function App() {
     }
   };
 
+  // Filtra la lista original según el término de búsqueda
+  const contactosFiltrados = contactos.filter((c) => {
+  const termino = busqueda.toLowerCase();
+
+ // Normaliza el texto a minúsculas para comparar y asi dar resultados
+ const nombre = c.nombre.toLowerCase();
+ const correo = c.correo.toLowerCase();
+ const telefono = String(c.telefono || "").toLowerCase();
+ const etiqueta = (c.etiqueta || "").toLowerCase();
+// 
+ // Se incluiye el contacto si el término aparece en alguno de estos campos
+ return (
+ nombre.includes(termino) ||
+ correo.includes(termino) ||
+ telefono.includes(termino)||
+ etiqueta.includes(termino)
+ );
+});
+// Ordenamos los contactos filtrados por nombre
+const contactosOrdenados = [...contactosFiltrados].sort((a, b) => {
+ const nombreA = a.nombre.toLowerCase();
+ const nombreB = b.nombre.toLowerCase();
+
+ if (nombreA < nombreB) return ordenAsc ? -1 : 1;
+ if (nombreA > nombreB) return ordenAsc ? 1 : -1;
+ return 0;
+});
+
   // JSX que renderiza toda la aplicación
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Contenedor principal centrado */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Encabezado principal de la Agenda usando la configuración global */}
         <header className="mb-8">
-          <p className="text-xs tracking-[0.3em] text-gray-500 uppercase">
+          <p className="text-xs tracking-[0.3em] text-black uppercase">
             Desarrollo Web ReactJS Ficha {APP_INFO.ficha}
           </p>
-          <h1 className="text-4xl font-extrabold text-gray-900 mt-2">
+          <h1 className="text-4xl font-extrabold text-black mt-2">
             {APP_INFO.titulo}
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-black mt-1">
             {APP_INFO.subtitulo}
           </p>
         </header>
@@ -135,17 +169,36 @@ function App() {
             {/* Formulario para crear nuevos contactos */}
             <FormularioContacto onAgregar={onAgregarContacto} />
 
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+              <input
+              type="text"
+              className="w-full  md:flex-1 rounded-xl p-1 px4 border-gray-500 focus:ring-purple-500 focus:border-purple-500 text-sm"
+              placeholder="Buscar por nombre,telefono, correo o etiqueta..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              />
+
+              <button
+              type="button"
+              onClick={() => setOrdenAsc((prev) => !prev)}
+              className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-200"
+              >
+              {ordenAsc ? "Ordenar Z-A" : "Ordenar A-Z"}
+              </button>
+            </div>
+
             {/* Listado de contactos */}
+            <p className="text-xl text-gray-400 mb-3"> Mostrando {contactosOrdenados.length} contactos</p>
             <section className="space-y-4">
-              {contactos.length === 0 ? (
+              {contactosOrdenados.length === 0 ? (
                 // Mensaje cuando no existen contactos aún
-                <p className="text-sm text-gray-500">
-                  Aún no tienes contactos registrados. Agrega el primero usando
-                  el formulario superior.
+                <p className="text-sm text-red-500 rounded-xl font-medium">
+                  No se encontraron contactos que coincidan con la busqueda
                 </p>
               ) : (
+              
                 // Recorremos la lista de contactos y mostramos una tarjeta por cada uno
-                contactos.map((c) => (
+                contactosOrdenados.map((c) => (
                   <ContactoCard
                     key={c.id} // Key única para cada elemento de la lista
                     nombre={c.nombre}

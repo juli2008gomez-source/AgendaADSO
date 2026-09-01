@@ -12,15 +12,28 @@
       "telefono": "3006161742",
       "correo": "jhony93xd@gmail.com",
       "etiqueta": "Aseo",
-      "empresa": "Emvarias",
       "id": "sKe7OADFOPI"
     },
     {
       "nombre": "Alma Marcela Gozo ",
       "telefono": "3001235678",
-      "correo": "alamamarcelagozo@gmail.com",
+      "correo": "almamarcelagozo@gmail.com",
       "etiqueta": "Trabajadora",
       "id": "sTyQ8de8DI8"
+    },
+    {
+      "nombre": "Cultura",
+      "telefono": "3013029854",
+      "correo": "sepulvedadiego671@gmail.com",
+      "etiqueta": "Parcero",
+      "id": "IcVI59IInHs"
+    },
+    {
+      "nombre": "Rosalbita",
+      "telefono": "3502237129",
+      "correo": "rosalbita@gmail.com",
+      "etiqueta": "Magister",
+      "id": "gM_d1rG18w4"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

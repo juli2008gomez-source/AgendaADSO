@@ -4,7 +4,6 @@ export default function ContactoCard({
  telefono,
  correo,
  etiqueta,
- empresa,
  onEliminar
 }) {
  return (
@@ -22,9 +21,7 @@ export default function ContactoCard({
   <p>
     Etiqueta: {etiqueta}
   </p>
-  <p>
-    Empresa: {empresa}
-  </p>
+
   </p>
   {/* Acciones (alineado a la izquierda en móvil) */}
  <div className="flex justify-start">
